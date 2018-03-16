@@ -1,20 +1,18 @@
 package com.wq.netty.handler;
 
+import com.wq.netty.NettyServerManager;
+import com.wq.util.LogUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
-    // client channel group
-    private static ChannelGroup group = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
-        group.writeAndFlush(msg.retain());
+        NettyServerManager.CLIENT_GROUP.writeAndFlush(msg.retain());
+        LogUtil.info(msg.retain().text());
     }
 
     @Override
@@ -24,12 +22,12 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        group.add(ctx.channel());
+        NettyServerManager.CLIENT_GROUP.add(ctx.channel());
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        group.remove(ctx.channel());
+        NettyServerManager.CLIENT_GROUP.remove(ctx.channel());
     }
 
     @Override

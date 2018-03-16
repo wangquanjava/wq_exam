@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+<configuration>
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{HH:mm:ss.SSS} %-5p %X{QTRACER} [%t] [%X{env} %X{caller}] %c{36}:%L - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="info" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <param name="file" value="${catalina.base}/logs/info.log"/>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/info.log.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>240</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date{HH:mm:ss.SSS} %-5p %X{QTRACER} [%t] [%X{env} %X{caller}] %c{36}:%L - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <param name="file" value="${catalina.base}/logs/error.log"/>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/error.log.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>240</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date{HH:mm:ss.SSS} %-5p %X{QTRACER} [%t] [%X{env} %X{caller}] %c{36}:%L - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="sql" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <param name="file" value="${catalina.base}/logs/sql.log"/>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/sql.log.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>240</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date{HH:mm:ss.SSS} %-5p %X{QTRACER} [%t] [%X{env} %X{caller}] %c{36}:%L - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 邮件日志 -->
+    <appender name="mail" class="ch.qos.logback.classic.net.SMTPAppender">
+        <bufferSize>512</bufferSize>
+        <SMTPHost>xxx</SMTPHost>
+        <username>xx</username>
+        <password>xx</password>
+        <From>xx</From>
+        <To>xx</To>
+        <subject>nirvana-%X{env} - %m{20}</subject>
+        <layout class="ch.qos.logback.classic.html.HTMLLayout">
+            <pattern>%d%t%X{sys}%X{env}%X{caller}%X{QTRACER}%msg</pattern>
+        </layout>
+    </appender>
+    <logger name="console_logger" additivity="false">
+        <appender-ref ref="console"/>
+    </logger>
+    <logger name="info_logger" additivity="false">
+        <appender-ref ref="info"/>
+        <appender-ref ref="console"/>
+    </logger>
+    <logger name="error_logger" additivity="false">
+        <appender-ref ref="info"/>
+        <appender-ref ref="error"/>
+        <appender-ref ref="console"/>
+    </logger>
+    <logger name="error_mail_logger" additivity="false">
+        <appender-ref ref="info"/>
+        <appender-ref ref="error"/>
+        <appender-ref ref="mail"/>
+        <appender-ref ref="console"/>
+    </logger>
+    <!-- 打印sql调试日志 -->
+    <logger name="com.quhuhu.nirvana.core.dao" level="DEBUG" additivity="false">
+        <appender-ref ref="sql"/>
+        <appender-ref ref="console"/>
+    </logger>
+    <root level="debug">
+        <appender-ref ref="console"/>
+    </root>
+</configuration>

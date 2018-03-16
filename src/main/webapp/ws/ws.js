@@ -15,15 +15,20 @@ WebChat = function(me) {
                 return;
             }
             WebChat.userName = '用户' + Math.floor((Math.random() * 1000) + 1);
-            WebChat.socket = new WebSocket("ws://127.0.0.1:7000/chat");
+            WebChat.socket = new WebSocket("ws://"+document.domain+":8888/chat");
             WebChat.socket.onopen = function(event) {
                 output('连接开启!');
             };
             WebChat.socket.onclose = function(event) {
                 output('连接被关闭!');
+                setTimeout(function () {
+                    console.info("尝试重连")
+                    WebChat.init();
+                }, 1000);
             };
             WebChat.socket.onmessage = function(event) {
                 output(event.data);
+                execPush(event.data);
             };
 
             function output(message) {
@@ -45,3 +50,21 @@ WebChat = function(me) {
         }
     };
 }();
+
+function fillQuestionArea (ProblemVO) {
+    $("#questionArea").html("");
+    $("#questionArea").text(ProblemVO.question);
+    $(ProblemVO.answers).each(function(i,o){
+        $($(".answerArea")[i]).val(o.value);
+        $($(".answerArea")[i]).parent().next().html(o.text);
+    });
+}
+
+function execPush(data) {
+    WSResp = $.parseJSON(data);
+    if (WSResp.action == 'ASSIGN') {
+        fillQuestionArea(WSResp.data)
+    } else if(WSResp.action == 'TAKEUP') {
+
+    }
+}

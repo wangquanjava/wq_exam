@@ -13,7 +13,6 @@ public class FullHttpRequestHandler extends SimpleChannelInboundHandler<FullHttp
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
-
 		if(chatUrl.equalsIgnoreCase(msg.uri())){
 			ctx.fireChannelRead(msg.retain());	
 			return;

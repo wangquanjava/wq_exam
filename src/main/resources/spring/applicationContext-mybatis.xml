@@ -1,104 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans  xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:aop="http://www.springframework.org/schema/aop"
-		xmlns:tx="http://www.springframework.org/schema/tx"
-		xmlns:context="http://www.springframework.org/schema/context"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans 
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
 							http://www.springframework.org/schema/beans/spring-beans.xsd
 							http://www.springframework.org/schema/tx 
 							http://www.springframework.org/schema/tx/spring-tx.xsd
 							http://www.springframework.org/schema/aop 
-							http://www.springframework.org/schema/aop/spring-aop.xsd
-							http://www.springframework.org/schema/context 
-							http://www.springframework.org/schema/context/spring-context.xsd">
-	<!-- 扫描@Repository注解 -->
-	<context:component-scan base-package="com.git.mapper" />
-	
-	<!-- 只能扫描继承通用Mapper的接口 -->
-	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-		<property name="basePackage" value="com.git.mapper" />
-	</bean>
-	
-	<!-- 加载配置文件-->
-	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<!-- 允许JVM参数覆盖 -->
-		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
-		<!-- 忽略没有找到的资源文件 -->
-		<property name="ignoreResourceNotFound" value="true" />
-		<!-- 配置资源文件 -->
-		<property name="locations">
-			<list>
-				<value>classpath:jdbc.properties</value>
-				<value>classpath:env.properties</value>
-			</list>
-		</property>
-	</bean>
-	
-	<!-- gruid连接池 -->
-	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close"> 
-		<!-- 基本属性 url、user、password，driverClassName可以根据url自动配置 -->
-		<property name="url" value="${jdbc.url}" />
-		<property name="username" value="${jdbc.username}" />
-		<property name="password" value="${jdbc.password}" />
-		
-		<!-- 配置初始化大小、最小、最大 -->
-		<property name="initialSize" value="1" />
-		<property name="minIdle" value="1" /> 
-		<property name="maxActive" value="20" />
-		<!-- 配置获取连接等待超时的时间 -->
-		<property name="maxWait" value="60000" />
-		
-		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
-		<property name="timeBetweenEvictionRunsMillis" value="60000" />
-		
-		<!-- 是否空闲的判定，大于这时间的就算空闲 -->
-		<property name="minEvictableIdleTimeMillis" value="300000" />
-		
-		<!-- 测试连接是否有效的sql -->
-		<property name="validationQuery" value="SELECT 'x'" />
-		<property name="testWhileIdle" value="true" />
-		<property name="testOnBorrow" value="false" />
-		<property name="testOnReturn" value="false" />
-		<!-- 配置监控统计拦截的filters -->
-		<property name="filters" value="stat" />
-	</bean>
+							http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-	<!-- 配置sqlSessionFactory -->
-	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-		<!-- 配置数据源 -->
-		<property name="dataSource" ref="dataSource" />
-		<!-- mybatis全局配置文件 -->
-		<property name="configLocation" value="classpath:mybatis/mybatis-config.xml" />
-		<!-- 配置别名扫描包 -->
-		<property name="typeAliasesPackage" value="com.git.domain" />
-	</bean>
+    <!-- gruid连接池 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <!-- 基本属性 url、user、password，driverClassName可以根据url自动配置 -->
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
 
-	<!-- 事务相关 -->
-	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="dataSource"></property>
-	</bean>
-	<tx:advice id="txAdvisor" transaction-manager="txManager">
-		<tx:attributes>
-			<!-- 默认：propagation="REQUIRED" read-only="false"，默认使用数据库的事务隔离级别 isolation="DEFAULT"(mysql默认是可重复读)。不能识别的都认为是读操作，不使用事务-->
-			<tx:method name="add"/>
-			<tx:method name="delete"/>
-			<tx:method name="update" />
-			<tx:method name="insert" />
-			<tx:method name="*" read-only="true"/>
-		</tx:attributes>
-	</tx:advice>
-	<aop:config>
-		<aop:advisor advice-ref="txAdvisor" pointcut="execution(* com.git.service.impl.*.*(..))"/>
-	</aop:config>
-	
-	<!-- 注册sqlSession -->
-	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
-	  <constructor-arg index="0" ref="sqlSessionFactory" />
-	</bean>
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="1"/>
+        <property name="minIdle" value="1"/>
+        <property name="maxActive" value="20"/>
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="60000"/>
 
-	<!--注册sqlMapper-->	
-	<bean id="sqlMapper" class="com.github.abel533.sql.SqlMapper" scope="prototype">
-	  <constructor-arg ref="sqlSession"/>
-	</bean>
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+
+        <!-- 是否空闲的判定，大于这时间的就算空闲 -->
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+
+        <!-- 测试连接是否有效的sql -->
+        <property name="validationQuery" value="SELECT 'x'"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+        <!-- 配置监控统计拦截的filters -->
+        <property name="filters" value="stat"/>
+    </bean>
+
+    <!-- 配置sqlSessionFactory -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- 配置数据源 -->
+        <property name="dataSource" ref="dataSource"/>
+        <!-- mybatis全局配置文件 -->
+        <property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
+        <!-- 配置别名扫描包 -->
+        <property name="mapperLocations">
+            <list>
+                <value>classpath*:com/wq/mapper/*.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 只能扫描继承通用Mapper的接口 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.wq.dao"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+
+    <!-- 事务相关 -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <tx:advice id="txAdvisor" transaction-manager="txManager">
+        <tx:attributes>
+            <!-- 默认：propagation="REQUIRED" read-only="false"，默认使用数据库的事务隔离级别 isolation="DEFAULT"(mysql默认是可重复读)。不能识别的都认为是读操作，不使用事务-->
+            <tx:method name="add"/>
+            <tx:method name="delete"/>
+            <tx:method name="update"/>
+            <tx:method name="insert"/>
+            <tx:method name="*" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+    <aop:config>
+        <aop:advisor advice-ref="txAdvisor" pointcut="execution(* com.wq.service.*.*(..))"/>
+    </aop:config>
 </beans>

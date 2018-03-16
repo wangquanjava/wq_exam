@@ -2,6 +2,7 @@ package com.wq.netty;
 
 import com.wq.netty.handler.FullHttpRequestHandler;
 import com.wq.netty.handler.TextWebSocketFrameHandler;
+import com.wq.util.LogUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -30,23 +31,39 @@ public class NettyServer {
                 serverBootstrap.childHandler(new ChannelInitializer() {
                     protected void initChannel(Channel channel) throws Exception {
                         ChannelPipeline pipeline = channel.pipeline();
-                        pipeline.addLast(new HttpServerCodec());pipeline.addLast(new HttpServerCodec());
+                        pipeline.addLast(new HttpServerCodec());
                         pipeline.addLast(new HttpObjectAggregator(65536));
                         pipeline.addLast(new ChunkedWriteHandler());
                         pipeline.addLast(new WebSocketServerProtocolHandler(serverPath));
                         pipeline.addLast(new FullHttpRequestHandler(serverPath));
                         pipeline.addLast(new TextWebSocketFrameHandler());
-
-
-
                     }
                 });
 
-
+                try {
+                    Channel channel = serverBootstrap.bind(port).sync().channel();
+                    channel.closeFuture().sync();
+                } catch (InterruptedException e) {
+                    LogUtil.error("启动失败", e);
+                } finally {
+                    bossgroup.shutdownGracefully();
+                    workergroup.shutdownGracefully();
+                }
             }
         });
+        thread.setDaemon(true);
+        thread.start();
     }
     public void destroy () {
+        
+    }
 
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    public void setServerPath(String serverPath) {
+        this.serverPath = serverPath;
     }
 }
